@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APOTEK LESTARI - Katalog Produk</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .pharmacy-gradient { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        .search-glow:focus { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
+        .item-card { transition: all 0.3s ease; }
+        .item-card:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        .pulse-animation { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="pharmacy-gradient text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-white bg-opacity-20 p-3 rounded-full">
+                        <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 8h-2v3h-3v2h3v3h2v-3h3v-2h-3V8zM4 6h5v2h2V6h1V4H4v2zm0 5v3c0 1.1.9 2 2 2h1v-2H6v-3H4zm7-4.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zM12 13c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold">APOTEK LESTARI</h1>
+                        <p class="text-green-100 text-sm">Kesehatan Keluarga Terpercaya</p>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center space-x-6 text-sm">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-clock"></i>
+                        <span>Buka 24 Jam</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-phone"></i>
+                        <span>(021) 123-4567</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Search Section -->
+    <section class="bg-white shadow-sm border-b">
+        <div class="container mx-auto px-4 py-6">
+            <div class="max-w-2xl mx-auto">
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="Cari obat, vitamin, atau produk kesehatan..."
+                        class="w-full px-6 py-4 pl-14 text-lg border-2 border-gray-200 rounded-full focus:border-green-500 focus:outline-none search-glow transition-all duration-300"
+                    >
+                    <i class="fas fa-search absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl"></i>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="bg-gradient-to-r from-green-50 to-blue-50 py-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                <div class="bg-white rounded-lg p-6 shadow-sm">
+                    <div class="text-3xl font-bold text-green-600" id="totalItems">0</div>
+                    <div class="text-gray-600 mt-1">Total Produk</div>
+                </div>
+                <div class="bg-white rounded-lg p-6 shadow-sm">
+                    <div class="text-3xl font-bold text-blue-600">24/7</div>
+                    <div class="text-gray-600 mt-1">Layanan</div>
+                </div>
+                <div class="bg-white rounded-lg p-6 shadow-sm">
+                    <div class="text-3xl font-bold text-purple-600">100%</div>
+                    <div class="text-gray-600 mt-1">Terpercaya</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Product Catalog -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-semibold text-gray-800">Katalog Produk</h2>
+            <div class="text-sm text-gray-600">
+                Menampilkan <span id="itemCount">0</span> produk
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="text-center py-12">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
+            <p class="mt-4 text-gray-600">Memuat produk...</p>
+        </div>
+
+        <!-- No Results -->
+        <div id="noResults" class="hidden text-center py-12">
+            <div class="text-6xl mb-4">🔍</div>
+            <h3 class="text-xl font-semibold text-gray-700 mb-2">Produk tidak ditemukan</h3>
+            <p class="text-gray-500">Coba gunakan kata kunci yang berbeda</p>
+        </div>
+
+        <!-- Product Grid -->
+        <div id="productGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Products will be loaded here -->
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12 mt-16">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">APOTEK LESTARI</h3>
+                    <p class="text-gray-300 mb-4">Apotek terpercaya untuk kebutuhan kesehatan keluarga Anda. Melayani dengan sepenuh hati sejak 1995.</p>
+                    <div class="flex space-x-4">
+                        <i class="fab fa-facebook text-2xl hover:text-green-400 cursor-pointer transition-colors"></i>
+                        <i class="fab fa-instagram text-2xl hover:text-green-400 cursor-pointer transition-colors"></i>
+                        <i class="fab fa-whatsapp text-2xl hover:text-green-400 cursor-pointer transition-colors"></i>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Kontak</h4>
+                    <div class="space-y-2 text-gray-300">
+                        <p><i class="fas fa-map-marker-alt mr-2"></i>Jl. Kesehatan No. 123, Jakarta</p>
+                        <p><i class="fas fa-phone mr-2"></i>(021) 123-4567</p>
+                        <p><i class="fas fa-envelope mr-2"></i>info@apoteklestari.com</p>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Jam Operasional</h4>
+                    <div class="space-y-2 text-gray-300">
+                        <p>Senin - Minggu: 24 Jam</p>
+                        <p>Layanan Konsultasi:</p>
+                        <p>08:00 - 22:00 WIB</p>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 Apotek Lestari. Semua hak dilindungi.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Google Sheets Configuration
+        const SHEET_ID = '1eFOIZRiVAimisZ88oDmMQSPY4X_l6OaR6nd8UZxOkxk';
+        const API_KEY = 'AIzaSyDYMXv1O4YNiDYKPL2v5bDUMxrShBmAHY4'; // Your Google Sheets API key
+        const SHEET_NAME = 'Sheet1'; // Replace with your actual sheet name
+        const RANGE = 'A:B'; // Columns A=Name, B=Price
+        
+        let products = [];
+
+        // Function to load data from Google Sheets
+        async function loadProductsFromSheets() {
+            console.log('Starting to load data from Google Sheets...');
+            console.log('Sheet ID:', SHEET_ID);
+            console.log('API Key:', API_KEY ? 'Present' : 'Missing');
+            
+            try {
+                // Method 1: Using Google Sheets API (requires API key)
+                const apiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}!${RANGE}?key=${API_KEY}`;
+                console.log('API URL:', apiUrl);
+                
+                const response = await fetch(apiUrl);
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Raw data from Google Sheets:', data);
+                
+                if (data.error) {
+                    console.error('Google Sheets API Error:', data.error);
+                    throw new Error(data.error.message);
+                }
+                
+                if (data.values && data.values.length > 0) {
+                    console.log('Found', data.values.length, 'rows');
+                    console.log('First few rows:', data.values.slice(0, 3));
+                    
+                    // Skip header row if it exists and convert to product objects
+                    const startRow = data.values[0] && (data.values[0][0] === 'Nama' || data.values[0][0] === 'Name') ? 1 : 0;
+                    products = data.values.slice(startRow).map((row, index) => {
+                        console.log(`Processing row ${index + startRow}:`, row);
+                        return {
+                            name: row[0] || '',
+                            price: row[1] || ''
+                        };
+                    }).filter(product => product.name && product.price);
+                    
+                    console.log('Processed products:', products);
+                } else {
+                    console.log('No data found in the sheet');
+                    products = [];
+                }
+                
+                console.log(`Successfully loaded ${products.length} products from Google Sheets`);
+                return products;
+                
+            } catch (error) {
+                console.error('Error loading from Google Sheets:', error);
+                
+                // Show detailed error message
+                const errorMsg = `Error: ${error.message}\n\nPossible solutions:\n1. Make sure the Google Sheet is public (Anyone with link can view)\n2. Check if the API key is correct\n3. Verify the Sheet ID is correct\n4. Make sure there's data in columns A and B`;
+                alert(errorMsg);
+                
+                // Fallback to sample data if Google Sheets fails
+                products = [
+                    { name: "Paracetamol 500mg", price: "Rp 5.000" },
+                    { name: "Amoxicillin 500mg", price: "Rp 15.000" },
+                    { name: "Vitamin C 1000mg", price: "Rp 25.000" },
+                    { name: "Vitamin D3", price: "Rp 35.000" },
+                    { name: "Betadine Solution", price: "Rp 12.000" },
+                    { name: "Hand Sanitizer", price: "Rp 8.000" },
+                    { name: "Ibuprofen 400mg", price: "Rp 7.500" },
+                    { name: "Multivitamin", price: "Rp 45.000" },
+                    { name: "Masker Medis", price: "Rp 15.000" },
+                    { name: "Antasida", price: "Rp 6.000" }
+                ];
+                
+                console.log('Using fallback sample data');
+                return products;
+            }
+        }
+
+        let filteredProducts = [...products];
+
+        // Initialize the page
+        async function init() {
+            try {
+                // Load products from Google Sheets
+                await loadProductsFromSheets();
+                
+                // Hide loading state and display products
+                document.getElementById('loadingState').style.display = 'none';
+                displayProducts(products);
+                updateStats();
+            } catch (error) {
+                console.error('Initialization error:', error);
+                document.getElementById('loadingState').style.display = 'none';
+                displayProducts([]);
+            }
+        }
+
+        // Display products
+        function displayProducts(productsToShow) {
+            const grid = document.getElementById('productGrid');
+            const noResults = document.getElementById('noResults');
+            
+            if (productsToShow.length === 0) {
+                grid.innerHTML = '';
+                noResults.classList.remove('hidden');
+                document.getElementById('itemCount').textContent = '0';
+                return;
+            }
+
+            noResults.classList.add('hidden');
+            
+            grid.innerHTML = productsToShow.map(product => `
+                <div class="item-card bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-800 text-lg">${product.name}</h3>
+                        </div>
+                        <div class="text-right ml-4">
+                            <span class="text-2xl font-bold text-green-600">${product.price}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('itemCount').textContent = productsToShow.length;
+        }
+
+        // Update statistics
+        function updateStats() {
+            document.getElementById('totalItems').textContent = products.length;
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            filterProducts(searchTerm);
+        });
+
+
+
+        // Search filter function
+        function filterProducts(searchTerm) {
+            let filtered = products;
+            
+            // Filter by search term
+            if (searchTerm) {
+                filtered = filtered.filter(product => 
+                    product.name.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            filteredProducts = filtered;
+            displayProducts(filtered);
+        }
+
+        // Initialize the page when loaded
+        init();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a70bb3b6788093',t:'MTc1NDQwNDc4NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
